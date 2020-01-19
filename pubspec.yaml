@@ -24,8 +24,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   http: any
-  font_awesome_flutter:
   weather_icons: 2.0.0
+  json_serializable: 3.2.5
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +66,11 @@ flutter:
         - asset: assets/fonts/Raleway-Regular.ttf
           style: normal
         - asset: assets/fonts/Raleway-Medium.ttf
+
+    - family: CyrilicRound
+      fonts:
+        - asset: assets/fonts/CyrilicRound.ttf
+          style: normal
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

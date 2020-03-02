@@ -54,9 +54,9 @@ class Wind {
 }
 
 class Main {
-  int humidity;
-  double temp;
-  double feelsLike;
+  var humidity;
+  var temp;
+  var feelsLike;
 
   Main({this.humidity, this.temp, this.feelsLike});
 

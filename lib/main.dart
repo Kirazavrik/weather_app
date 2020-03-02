@@ -5,10 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:weather_app/models/ForecastFiveDays.dart';
+import 'package:weather_app/utils/DateTimeConverter.dart';
 import 'models/CurrentWeather.dart';
 import 'package:weather_icons/weather_icons.dart';
 import 'utils/WeatherConditionsUtils.dart';
-
 void main() => runApp(MyApp());
 
 Future<CurrentWeather> fetchCurrentWeather() async{
@@ -45,6 +45,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   int humidity;
   double temp;
   double feelsLike;
@@ -116,27 +117,34 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget weatherWidget1(double tempus, String descript, String curentIconCode) => Container(
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(
-          (tempus.toInt().toString() + "\u00B0"),
-          style: TextStyle(
-              fontSize: 120.0, color: Colors.grey, fontWeight: FontWeight.w100
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            (tempus.toInt().toString() + "\u00B0"),
+            style: TextStyle(
+                fontSize: 120.0, color: Colors.grey, fontWeight: FontWeight.w100
+            ),
           ),
-        ),
-        Column(
-          children: <Widget>[
-            BoxedIcon(
-              WeatherIcons.fromString(curentIconCode, fallback: WeatherIcons.na),
-              size: 50.0, color: Colors.grey,),
-            Text(
-              descript,
-              style: TextStyle(fontSize: 18.0, color: Colors.grey, fontFamily: 'CyrilicRound'),
-            )
-          ],
-        )
-      ],
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                BoxedIcon(
+                  WeatherIcons.fromString(curentIconCode, fallback: WeatherIcons.na),
+                  size: 50.0, color: Colors.grey,),
+                Container(
+                  child: Text(
+                    descript,
+                    style: TextStyle(fontSize: 18.0, color: Colors.grey, fontFamily: 'CyrilicRound'),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     ),
   );
 
@@ -177,16 +185,14 @@ class _MyAppState extends State<MyApp> {
       future: forecastFiveDays,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<ThreeHourWeather> weathersArray = snapshot.data.listOfWeather;
-          getFiveDaysForecast(weathersArray);
+          List<ThreeHourWeather> weathersArray = getFiveDaysForecast(snapshot.data.listOfWeather);
+          List<ThreeHourWeather> datetimeArray = weathersArray.where((value) => weathersArray.indexOf(value) % 2 == 0);
+          print(datetimeArray);
           return ListView.separated(
               padding: const EdgeInsets.all(8),
-              itemCount: 10,
+              itemCount: 5,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  height: 50.0,
-                  child: Center(child: Text(DateTime.now().day.toString())),
-                );
+                return oneDayForecast(index, weathersArray, datetimeArray);
               },
               separatorBuilder: (BuildContext context, int index) => const Divider()
           );
@@ -197,11 +203,35 @@ class _MyAppState extends State<MyApp> {
       },
     ),
   );
-  
-  getFiveDaysForecast(List<ThreeHourWeather> list) {
+
+  Widget oneDayForecast(int index, List<ThreeHourWeather> array, List<ThreeHourWeather> dateArray) => Container(
+    height: 100,
+    child: Column(
+      children: <Widget>[
+        Text(
+          DateTimeConverter.getDateTime(array[index].datetime).date
+        ),
+        Row(
+          children: <Widget>[
+            Text(array[index].main.temperature.toString())
+          ],
+        )
+      ],
+    ),
+  );
+
+  // do some magic stuff
+  List<ThreeHourWeather> getFiveDaysForecast(List<ThreeHourWeather> list) {
     int currentDate = DateTime.now().day;
-    var listWithoutCurrentDay = list.where((item) => int.parse(item.datetime.substring(8, 10)) > currentDate).toList();
-    print(listWithoutCurrentDay[0].datetime);
+    var listWithoutCurrentDay = list.where(
+            (item) => (int.parse(item.datetime.substring(8, 10)) > currentDate && int.parse(item.datetime.substring(11, 13)) == 15) ||
+                (int.parse(item.datetime.substring(8, 10)) > currentDate && int.parse(item.datetime.substring(11, 13)) == 03)
+    ).toList();
+    if (listWithoutCurrentDay.length < 10) {
+      listWithoutCurrentDay.add(list[list.length-1]);
+    }
+    listWithoutCurrentDay.forEach((item) => print(item.datetime));
+    return listWithoutCurrentDay;
   }
 
 }

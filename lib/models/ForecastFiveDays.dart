@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class ForecastFiveDays {
   final int count;
@@ -21,13 +20,18 @@ class ForecastFiveDays {
 class ThreeHourWeather {
   final String datetime;
   Main main;
+  final List<ForecastWeathers> forecastWeathers;
 
-  ThreeHourWeather({this.datetime, this.main});
+  ThreeHourWeather({this.datetime, this.main, this.forecastWeathers});
 
   factory ThreeHourWeather.fromJson(Map<String, dynamic> json) {
+    var list = json['weather'] as List;
+    print(list.runtimeType);
+    List<ForecastWeathers> forecastWeathersList = list.map((i) => ForecastWeathers.fromJson(i)).toList();
     return ThreeHourWeather(
       datetime: json['dt_txt'] as String,
-      main: Main.fromJson(json['main'])
+      main: Main.fromJson(json['main']),
+      forecastWeathers: forecastWeathersList
     );
   }
 }
@@ -40,6 +44,18 @@ class Main {
   factory Main.fromJson(Map<String, dynamic> json) {
     return Main(
       temperature: json['temp']
+    );
+  }
+}
+
+class ForecastWeathers {
+  int id;
+
+  ForecastWeathers({this.id});
+
+  factory ForecastWeathers.fromJson(Map<String, dynamic> json) {
+    return ForecastWeathers(
+        id: json['id'] as int
     );
   }
 }
